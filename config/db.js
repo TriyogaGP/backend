@@ -4,7 +4,7 @@ const koneksi = mysql.createConnection({
     host: process.env.HOST || "localhost",
     user: process.env.USER || "root",
     password: process.env.PASSWORD || "",
-    database: process.env.DATABASE || "db_pembelajaran",
+    database: process.env.DATABASE || "db_haha",
     multipleStatements: true
 });
 // koneksi database
