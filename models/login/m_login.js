@@ -56,7 +56,6 @@ const createUsers = (res, statement, statementCheck, data) => {
             return response(res, { kode: '404', message: 'Nama atau Email sudah digunakan' }, 404);
         }else{
             if (data.name == '' || data.name == null) { return response(res, { kode: '404', message: 'Nama Lengkap tidak boleh kosong', error: err }, 404); }
-            else if (data.name == '' || data.name == null) { return response(res, { kode: '404', message: 'Nama Lengkap tidak boleh kosong', error: err }, 404); }
             else if (data.password == '' || data.password == null) { return response(res, { kode: '404', message: 'Kata Sandi tidak boleh kosong', error: err }, 404); }
             else if (data.confPassword == '' || data.confPassword == null) { return response(res, { kode: '404', message: 'Konfirmasi Kata Sandi tidak boleh kosong', error: err }, 404); }
             else if(data.password !== data.confPassword) return response(res, { kode: '404', message: 'Kata Sandi dan Konfirmasi Kata Sandi tidak cocok !' }, 404);
@@ -226,7 +225,7 @@ const postUsersByGmail = (res, statement, data) => {
 
         // jika request berhasil
         kode = 200
-        message = 'Berhasil!'
+        message = 'Anda berhasil masuk panel Dashboard!'
         response(res, { kode, message }, 200);
     });
 };
@@ -283,39 +282,39 @@ const updateUser = (res, statement, statementCheck, data) => {
             return response(res, { kode: '500', message: 'Gagal', error: err }, 500);
         }
         if(result.length){
-						if(data.ubah === 'nama'){
-							kirimData = {
-								name: data.name
-							}
-						}else if(data.ubah === 'katasandi'){
-							// console.log(data.passwordlama, result[0].password)
-							if (data.passwordlama == '' || data.passwordlama == null) { return response(res, { kode: '404', message: 'Kata Sandi Lama tidak boleh kosong', error: err }, 404); }
-							const match = await bcrypt.compare(data.passwordlama, result[0].password);
-							if(!match) return response(res, { kode: '404', message: 'Kata Sandi Lama salah !' }, 404);
-							if (data.passwordbaru == '' || data.passwordbaru == null) { return response(res, { kode: '404', message: 'Kata Sandi Baru tidak boleh kosong', error: err }, 404); }
-							else if (data.confPasswordbaru == '' || data.confPasswordbaru == null) { return response(res, { kode: '404', message: 'Konfirmasi Kata Sandi Baru tidak boleh kosong', error: err }, 404); }
-							else if(data.passwordbaru !== data.confPasswordbaru) return response(res, { kode: '404', message: 'Kata Sandi dan Konfirmasi Kata Sandi tidak cocok !' }, 404);
-							const salt = await bcrypt.genSalt();
-							const hashPassword = await bcrypt.hash(data.passwordbaru, salt);
+            if(data.ubah === 'nama'){
+                kirimData = {
+                    name: data.name
+                }
+            }else if(data.ubah === 'katasandi'){
+                // console.log(data.passwordlama, result[0].password)
+                if (data.passwordlama == '' || data.passwordlama == null) { return response(res, { kode: '404', message: 'Kata Sandi Lama tidak boleh kosong', error: err }, 404); }
+                const match = await bcrypt.compare(data.passwordlama, result[0].password);
+                if(!match) return response(res, { kode: '404', message: 'Kata Sandi Lama salah !' }, 404);
+                if (data.passwordbaru == '' || data.passwordbaru == null) { return response(res, { kode: '404', message: 'Kata Sandi Baru tidak boleh kosong', error: err }, 404); }
+                else if (data.confPasswordbaru == '' || data.confPasswordbaru == null) { return response(res, { kode: '404', message: 'Konfirmasi Kata Sandi Baru tidak boleh kosong', error: err }, 404); }
+                else if(data.passwordbaru !== data.confPasswordbaru) return response(res, { kode: '404', message: 'Kata Sandi dan Konfirmasi Kata Sandi tidak cocok !' }, 404);
+                const salt = await bcrypt.genSalt();
+                const hashPassword = await bcrypt.hash(data.passwordbaru, salt);
 
-							const userID = result[0].id;
-							const name = result[0].name;
-							const email = result[0].email;
-							const codeLog = result[0].codeLog;
-							const accessToken = jwt.sign({userID, name, email}, process.env.ACCESS_TOKEN_SECRET, {
-									expiresIn: '12h'
-							});
-							const refreshToken = jwt.sign({userID, name, email}, process.env.REFRESH_TOKEN_SECRET, {
-									expiresIn: '1d'
-							});
+                const userID = result[0].id;
+                const name = result[0].name;
+                const email = result[0].email;
+                const codeLog = result[0].codeLog;
+                const accessToken = jwt.sign({userID, name, email}, process.env.ACCESS_TOKEN_SECRET, {
+                        expiresIn: '12h'
+                });
+                const refreshToken = jwt.sign({userID, name, email}, process.env.REFRESH_TOKEN_SECRET, {
+                        expiresIn: '1d'
+                });
 
-							kirimData = {
-								password: hashPassword,
-								refresh_token: refreshToken,
-								codeLog: codeLog,
-								gambarGmail: null
-							}
-						}
+                kirimData = {
+                    password: hashPassword,
+                    refresh_token: refreshToken,
+                    codeLog: codeLog,
+                    gambarGmail: null
+                }
+            }
             koneksi.query(statement, [kirimData, data.id], (err, result, field) => {
                 // error handling
                 if (err) {

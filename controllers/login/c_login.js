@@ -48,7 +48,7 @@ const confirmation = (req, res) => {
 const login = (req, res) => {
     // buat variabel penampung data dan query sql
     const data = { ...req.body };
-    const queryCheck = 'SELECT * FROM users WHERE email = ?';
+    const queryCheck = 'SELECT * FROM users WHERE email = ? && activeAkun = 1';
     const querySql = 'UPDATE users SET ? WHERE email = ?';
 
     // masukkan ke dalam model
@@ -58,7 +58,7 @@ const login = (req, res) => {
 const loginByGmail = (req, res) => {
     // buat variabel penampung data dan query sql
     const data = { ...req.body };
-    const queryCheck = 'SELECT * FROM users WHERE email = ?';
+    const queryCheck = 'SELECT * FROM users WHERE email = ? && activeAkun = 1';
     const querySql = 'UPDATE users SET ? WHERE email = ?';
 
     // masukkan ke dalam model
