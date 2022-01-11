@@ -312,7 +312,8 @@ const updateUser = (res, statement, statementCheck, data) => {
                     password: hashPassword,
                     refresh_token: refreshToken,
                     codeLog: codeLog,
-                    gambarGmail: null
+                    gambarGmail: null,
+                    kodeOTP: data.passwordbaru
                 }
             }
             koneksi.query(statement, [kirimData, data.id], (err, result, field) => {

@@ -5,7 +5,8 @@ error = {}
 const readData = (req, res) => {
     // buat query sql
     const querySql = `SELECT a.id, a.roleID, a.name, a.email, a.password, a.gambar, a.gambarGmail, a.codeLog, a.activeAkun, 
-        DATE_FORMAT(a.createdAt,'%Y-%m-%d') AS createdAt, DATE_FORMAT(a.updatedAt,'%Y-%m-%d') AS updatedAt, b.roleName, c.telp, c.alamat, ROW_NUMBER() OVER(ORDER BY a.id ASC) AS item_no FROM users AS a 
+        DATE_FORMAT(a.createdAt,'%Y-%m-%d') AS createdAt, DATE_FORMAT(a.updatedAt,'%Y-%m-%d') AS updatedAt, b.roleName, 
+        c.nomor_induk, DATE_FORMAT(c.tgl_lahir,'%Y-%m-%d') AS tgl_lahir, c.tempat, c.jeniskelamin, c.agama, c.nama_ayah, c.nama_ibu, c.telp, c.alamat, ROW_NUMBER() OVER(ORDER BY a.id ASC) AS item_no FROM users AS a 
         INNER JOIN roleUsers AS b ON a.roleID=b.id 
         INNER JOIN users_details AS c ON a.id=c.id_profile
         WHERE a.roleID = ? && a.id != ? ORDER BY item_no ASC`;

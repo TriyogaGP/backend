@@ -32,27 +32,27 @@ const getUsers = (res, statement, params) => {
 
 const createupdateUsers = (res, statementCheck, Usersstatement, Usersdetailsstatement, data) => {
     // jalankan query
-	koneksi.query(statementCheck, [data.name, data.email], async(err, result, field) => {
-        // error handling
-        if (err) {
-            return response(res, { kode: '500', message: 'Gagal', error: err }, 500);
-        }
-        if(result.length){
-            return response(res, { kode: '404', message: 'Nama atau Email sudah digunakan' }, 404);
-        }else{
-            if (data.name == '' || data.name == null) { return response(res, { kode: '404', message: 'Nama Lengkap tidak boleh kosong', error: err }, 404); }
-            else if (data.password == '' || data.password == null) { return response(res, { kode: '404', message: 'Kata Sandi tidak boleh kosong', error: err }, 404); }
-			const salt = await bcrypt.genSalt();
-            const hashPassword = await bcrypt.hash(data.password, salt);
-			const kirimdata1 = {
-				roleID: data.roleID,
-				name: data.name,
-				email: data.email,
-				password: hashPassword,
-				kodeOTP: data.password,
+	switch(data.jenis) {
+	case 'ADD' :
+		koneksi.query(statementCheck, [data.name, data.email], async(err, result, field) => {
+			// error handling
+			if (err) {
+				return response(res, { kode: '500', message: 'Gagal', error: err }, 500);
 			}
-			switch(data.jenis) {
-			case 'ADD' :
+			if(result.length){
+				return response(res, { kode: '404', message: 'Nama atau Email sudah digunakan' }, 404);
+			}else{
+				if (data.name == '' || data.name == null) { return response(res, { kode: '404', message: 'Nama Lengkap tidak boleh kosong', error: err }, 404); }
+				else if (data.password == '' || data.password == null) { return response(res, { kode: '404', message: 'Kata Sandi tidak boleh kosong', error: err }, 404); }
+				const salt = await bcrypt.genSalt();
+				const hashPassword = await bcrypt.hash(data.password, salt);
+				const kirimdata1 = {
+					roleID: data.roleID,
+					name: data.name,
+					email: data.email,
+					password: hashPassword,
+					kodeOTP: data.password,
+				}
 				koneksi.query(Usersstatement, kirimdata1, (err, result, field) => {
 					// error handling
 					if (err) {
@@ -65,6 +65,13 @@ const createupdateUsers = (res, statementCheck, Usersstatement, Usersdetailsstat
 						}
 						const kirimdata2 = {
 							id_profile: result[0].id,
+							nomor_induk: data.nomor_induk,
+							tgl_lahir: data.tgl_lahir,
+							tempat: data.tempat,
+							agama: data.agama,
+							jeniskelamin: data.jeniskelamin,
+							nama_ayah: data.nama_ayah,
+							nama_ibu: data.nama_ibu,
 							telp: data.telp,
 							alamat: data.alamat
 						}
@@ -74,7 +81,7 @@ const createupdateUsers = (res, statementCheck, Usersstatement, Usersdetailsstat
 							if (err) {
 								return response(res, { kode: '500', message: 'Gagal', error: err }, 500);
 							}
-
+	
 							var transporter = nodemailer.createTransport({
 								service: 'gmail',
 								auth: {
@@ -97,7 +104,7 @@ const createupdateUsers = (res, statementCheck, Usersstatement, Usersdetailsstat
 								Ikuti tautan ini untuk mengonfirmasi pendaftaran Anda:<br>
 								<a href="http://localhost:5000/restApi/moduleUser/verifikasi/${data.password}/1">konfirmasi akun</a><br>Jika Anda memiliki pertanyaan, silakan balas email ini`
 							};
-
+	
 							transporter.sendMail(mailOptions, (err, info) => {
 								console.error(err)
 								if (err) return response(res, { kode: '500', message: 'Gagal mengirim data ke alamat email anda, cek lagi email yang di daftarkan!.', error: err }, 500);;
@@ -109,37 +116,92 @@ const createupdateUsers = (res, statementCheck, Usersstatement, Usersdetailsstat
 						});
 					});
 				});
-				break;
-			case 'EDIT':
+			}
+		});
+		break;
+	case 'EDIT':
+		koneksi.query(statementCheck, [data.name, data.email], async(err, result, field) => {
+			// error handling
+			if (err) {
+				return response(res, { kode: '500', message: 'Gagal', error: err }, 500);
+			}
+			if(result.length){
+				const salt = await bcrypt.genSalt();
+				const hashPassword = await bcrypt.hash(data.password, salt);
+				const passbaru = data.password === result[0].password ? result[0].password : hashPassword
+				const kondisipassbaru = data.password === result[0].password ? '<b>Menggunakan kata sandi yang lama</b>' : data.password
+				const kodeverifikasi = data.password === result[0].password ? data.kodeOTP : data.password
+				const kirimdata1 = {
+					name: data.name,
+					email: data.email,
+					password: passbaru,
+					activeAkun: '0',
+					kodeOTP: data.password === result[0].password ? data.kodeOTP : data.password
+				}
 				koneksi.query(Usersstatement, [kirimdata1, data.id], (err, result, field) => {
 					// error handling
 					if (err) {
 						return response(res, { kode: '500', message: 'Gagal', error: err }, 500);
 					}
 					const kirimdata2 = {
+						nomor_induk: data.nomor_induk,
+						tgl_lahir: data.tgl_lahir,
+						tempat: data.tempat,
+						agama: data.agama,
+						jeniskelamin: data.jeniskelamin,
+						nama_ayah: data.nama_ayah,
+						nama_ibu: data.nama_ibu,
 						telp: data.telp,
 						alamat: data.alamat
 					}
-
+		
 					// jika request berhasil
 					koneksi.query(Usersdetailsstatement, [kirimdata2, data.id], (err, result, field) => {
 						// error handling
 						if (err) {
 							return response(res, { kode: '500', message: 'Gagal', error: err }, 500);
 						}
-
+		
 						// jika request berhasil
-						kode = 200
-						message = 'Data berhasil diubah'
-						response(res, { kode, message }, 200);
+						var transporter = nodemailer.createTransport({
+							service: 'gmail',
+							auth: {
+								user: 'triyoga.ginanjar.p@gmail.com',
+								pass: 'Yoga17051993'
+							}
+						});
+			
+						var mailOptions = {
+							from: 'triyoga.ginanjar.p@gmail.com',
+							to: data.email,
+							subject: 'Konfirmasi Pendaftaran Akun',
+							// text: `Silahkan masukan kode verifikasi akun tersebut`
+							html: `<h1>Konfirmasi Pendataran Akun</h1>
+							<ul>
+								<li>Nama Lengkap : ${data.name}</li>
+								<li>Alamat Email : ${data.email}</li>
+								<li>Kata Sandi : ${kondisipassbaru}</li>
+							</ul>
+							Ikuti tautan ini untuk mengonfirmasi pendaftaran Anda:<br>
+							<a href="http://localhost:5000/restApi/moduleUser/verifikasi/${kodeverifikasi}/1">konfirmasi akun</a><br>Jika Anda memiliki pertanyaan, silakan balas email ini`
+						};
+
+						transporter.sendMail(mailOptions, (err, info) => {
+							console.error(err)
+							if (err) return response(res, { kode: '500', message: 'Gagal mengirim data ke alamat email anda, cek lagi email yang di daftarkan!.', error: err }, 500);;
+							// jika request berhasil
+							kode = 200
+							message = 'Data berhasil diubah'
+							response(res, { kode, message }, 200);
+						});
 					});
 				});
-				break;
-			default:
-				console.log('Error')
 			}
-		}
-    });			
+		})
+		break;
+	default:
+		console.log('Error')
+	}			
 };
 
 const updateUserBY = (res, statement, statementCheck, data) => {
@@ -221,6 +283,9 @@ const verifikasiUsers = (res, statement, statementCheck, data) => {
         }
         if(result.length){
 			const kirimData = {
+				gambarGmail : null,
+				refresh_token : null,
+				codeLog : '0',
 				activeAkun : data.activeAkun
 			}
             koneksi.query(statement, [kirimData, data.kode], (err, result, field) => {
